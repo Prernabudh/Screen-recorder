@@ -1,7 +1,16 @@
-const videoElement = document.querySelector("video");
-const startBtn = document.querySelector("#startBtn");
-const stopBtn = document.querySelector("#stopBtn");
+const videoElement = document.createElement("video");
+const startBtn = document.createElement("button");
+startBtn.id = "startBtn";
+startBtn.innerText = "Start";
+const stopBtn = document.createElement("button");
+stopBtn.id = "stopBtn";
+stopBtn.innerText = "Stop";
+stopBtn.disabled = true;
 const videoSelectBtn = document.getElementById("videoSelectBtn");
+const videoPLayer = document.querySelector(".video-player");
+const beforeVideo = document.querySelector(".before-video");
+const buttons = document.querySelector(".buttons");
+const functionalButtons = document.querySelector(".functional-buttons");
 
 const { desktopCapturer, remote } = require("electron");
 
@@ -14,6 +23,8 @@ startBtn.onclick = (e) => {
   mediaRecorder.start();
   startBtn.classList.add("is-danger");
   startBtn.innerText = "Recording";
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
 };
 
 stopBtn.onclick = (e) => {
@@ -42,6 +53,10 @@ const getVideoSources = async () => {
 videoSelectBtn.onclick = getVideoSources;
 
 const selectSource = async (source) => {
+  beforeVideo.remove();
+  videoPLayer.appendChild(videoElement);
+  functionalButtons.appendChild(startBtn);
+  functionalButtons.appendChild(stopBtn);
   videoSelectBtn.innerText = source.name;
   const constraints = {
     audio: false,
@@ -83,7 +98,14 @@ const handleStop = async () => {
   });
 
   console.log(filePath);
-  writeFile(filePath, buffer, () => {
-    console.log("Video saved");
-  });
+  if (filePath) {
+    writeFile(filePath, buffer, async () => {
+      await dialog.showMessageBox({
+        message: "Video saved successfully!",
+      });
+      location.reload();
+    });
+  } else {
+    location.reload();
+  }
 };
